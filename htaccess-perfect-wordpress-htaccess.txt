@@ -1,0 +1,107 @@
+# WordPress .htaccess file
+# Version: 1.0
+# Author: Jonathan Brown
+# URL:
+
+
+
+# Disable directory views
+Options -Indexes
+<IfModule dir_module>
+	DirectoryIndex disabled
+	DirectoryIndex index.php
+</IfModule>
+
+
+
+# Set default encoding
+AddDefaultCharset UTF-8
+
+# Set encoding for CSS & JS
+<IfModule mod_mime.c>
+	AddCharset utf-8 .html .css .js
+</IfModule>
+
+
+
+# Add Vary header
+<IfModule mod_headers.c>
+	<FilesMatch "\.(css|js|gz|xml)$">
+		Header append Vary: Accept-Encoding
+	</FilesMatch>
+</IfModule>
+
+
+
+# Add Security Headers
+<IfModule mod_headers.c>
+	Header set X-XSS-Protection "1; mode=block"
+	Header always append X-Frame-Options SAMEORIGIN
+	Header set X-Content-Type-Options nosniff
+</IfModule>
+
+
+
+# Protect sensitive files
+<FilesMatch "^(wp-config.php|license.txt|readme.html)">
+	Order Allow,Deny
+	Deny from all
+</FilesMatch>
+
+
+
+# Leverage browser caching
+<IfModule mod_expires.c>
+	ExpiresActive on
+	ExpiresDefault "access plus 1 month"
+	#
+	ExpiresByType image/jpg  "access plus 1 year"
+	ExpiresByType image/jpeg "access plus 1 year"
+	ExpiresByType image/gif  "access plus 1 year"
+	ExpiresByType image/png  "access plus 1 year"
+	ExpiresByType text/css   "access plus 1 month"
+	#
+	ExpiresByType text/javascript        "access plus 1 month"
+	ExpiresByType application/javascript "access plus 1 month"
+	ExpiresByType text/x-javascript      "access plus 1 month"
+	#
+	ExpiresByType image/x-icon "access plus 1 year"
+</IfModule>
+
+
+
+# Enable file compression
+<IfModule mod_deflate.c>
+	AddOutputFilter       DEFLATE css js
+	AddOutputFilterByType DEFLATE image/svg+xml image/x-icon
+	AddOutputFilterByType DEFLATE application/vnd.ms-fontobject application/x-font-ttf font/opentype
+	AddOutputFilterByType DEFLATE application/javascript application/x-javascript text/javascript text/x-js
+	AddOutputFilterByType DEFLATE text/html text/plain text/richtext text/css application/json text/xsd text/xsl
+	AddOutputFilterByType DEFLATE text/xml text/x-component application/xml application/xhtml+xml application/rss+xml application/atom+xml
+</IfModule>
+
+
+
+# Block external POST
+<IfModule mod_rewrite.c>
+	RewriteCond %{REQUEST_METHOD} POST
+	RewriteCond %{REQUEST_URI} (wp-comments-post|wp-login)\.php [NC]
+	RewriteCond %{HTTP_REFERER} !(.*)example.com [NC,OR]
+	RewriteCond %{HTTP_USER_AGENT} ^$
+	RewriteRule .* - [L]
+</IfModule>
+
+
+
+# BEGIN WordPress
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	RewriteBase /
+	RewriteRule ^index\.php$ - [L]
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteRule . /index.php [L]
+</IfModule>
+# END WordPress
+
+
